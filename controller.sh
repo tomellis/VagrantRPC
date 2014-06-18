@@ -53,18 +53,32 @@ function setup_rabbit() {
 
 function install_rabbit() {
     RABBITMQ_KEY="${RABBIT_URL}/rabbitmq-signing-key-public.asc"
-    wget -O /tmp/rabbitmq.asc ${RABBITMQ_KEY};
-    apt-key add /tmp/rabbitmq.asc
+    if [ -f /var/cache/vagrant/rabbitmq.asc ];then
+        apt-key add /var/cache/vagrant/rabbitmq.asc
+    else
+        wget -O /tmp/rabbitmq.asc ${RABBITMQ_KEY};
+        apt-key add /tmp/rabbitmq.asc
+    fi
+
     RABBITMQ="${RABBIT_URL}/releases/rabbitmq-server/v3.1.5/rabbitmq-server_3.1.5-1_all.deb"
-    wget -O /tmp/rabbitmq.deb ${RABBITMQ}
-    dpkg -i /tmp/rabbitmq.deb
+    if [ -f /var/cache/vagrant/rabbitmq.deb ];then
+        dpkg -i /var/cache/vagrant/rabbitmq.deb
+    else
+        wget -O /tmp/rabbitmq.deb ${RABBITMQ}
+        dpkg -i /tmp/rabbitmq.deb
+    fi 
+
 }
 
 function install_chef_server() {
     CHEF="https://www.opscode.com/chef/download-server?p=ubuntu&pv=12.04&m=x86_64"
     CHEF_SERVER_PACKAGE_URL="${CHEF}"
-    wget -O /tmp/chef_server.deb ${CHEF_SERVER_PACKAGE_URL}
-    dpkg -i /tmp/chef_server.deb
+    if [ -f /var/cache/vagrant/chef_server.deb ];then
+        dpkg -i /var/cache/vagrant/chef_server.deb
+    else
+        wget -O /tmp/chef_server.deb ${CHEF_SERVER_PACKAGE_URL}
+        dpkg -i /tmp/chef_server.deb
+    fi
 
     ln -sf /opt/chef-server/embedded/bin/knife /usr/bin/knife
     ln -sf /opt/chef-server/embedded/bin/ohai /usr/bin/ohai
@@ -115,12 +129,16 @@ function install_cookbooks() {
         rm -rf /opt/chef-cookbooks
     fi
 
-    git clone https://github.com/rcbops/chef-cookbooks.git /opt/chef-cookbooks
-    pushd /opt/chef-cookbooks
-    git checkout ${COOKBOOK_VERSION}
-    git submodule init
-    git submodule sync
-    git submodule update
+    if [ -d /var/cache/vagrant/chef-cookbooks ];then
+        mv /var/cache/vagrant/chef-cookbooks /opt
+    else
+       git clone https://github.com/rcbops/chef-cookbooks.git /opt/chef-cookbooks
+       pushd /opt/chef-cookbooks
+       git checkout ${COOKBOOK_VERSION}
+       git submodule init
+       git submodule sync
+       git submodule update
+    fi
 
 
     # Upload all of the RCBOPS Cookbooks
@@ -366,6 +384,7 @@ setup_rabbit
 install_chef_server
 configure_chef_server
 install_chef_client
+sleep 10s
 install_cookbooks
 setup_ssh
 configure_environment
