@@ -8,8 +8,8 @@ nodes = {
 }
 
 Vagrant.configure("2") do |config|
-    config.vm.box = "precise64"
-    config.vm.box_url = "http://files.vagrantup.com/precise64.box"
+    config.vm.box = "rpc-precise64"
+    #config.vm.box_url = "http://files.vagrantup.com/precise64.box"
 
     #Default is 2200..something, but port 2200 is used by forescout NAC agent.
     config.vm.usable_port_range= 2800..2900 
@@ -48,7 +48,7 @@ Vagrant.configure("2") do |config|
                 # Otherwise using VirtualBox
                 box.vm.provider :virtualbox do |vbox|
 	            # Defaults
-                    vbox.customize ["modifyvm", :id, "--memory", 1024]
+                    vbox.customize ["modifyvm", :id, "--memory", 512]
                     vbox.customize ["modifyvm", :id, "--cpus", 1]
 		    if prefix == "compute"
                     	vbox.customize ["modifyvm", :id, "--memory", 2048]
