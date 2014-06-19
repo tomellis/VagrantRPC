@@ -1,0 +1,77 @@
+Instructions for installation
+=============================
+We'll install openstack (and look at the configuration), give a tutorial
+on Image, Network and Compute, then we'll all use the private cloud
+installation to create a demonstration multi-tier webapp for example!
+
+1. Install GIT
+apt-get install –y git
+yum install –y git
+brew install git
+
+2. Install Vagrant
+USB Key or http://www.vagrantup.com
+
+3. Install VirtualBox
+USB Key or http://www.virtualbox.org 
+
+4. Import the Vagrant Box with cached packages:
+vagrant box add rpc-precise64 /path/to/rpc-precise64.box
+
+5. Checkout a Vagrantfile:
+
+If you have the Rackspace USB Key (cached box):
+  git clone https://github.com/tomellis/VagrantRPC.git
+Without USB Key:
+     git clone https://github.com/uksysadmin/VagrantRPC.git
+
+6. cd VagrantRPC && vagrant up
+   This may take around... 40-60 minutes - depending on the speed of the internet connection
+
+After installation
+==================
+
+Your environment should look something like this:
+
+Proxy server: eth0 (NAT), eth1 (172.16.0.110)
+OpenStack controller: eth0 (NAT), eth1 (neutron), eth2 (172.16.0.200), eth3
+(192.168.100.200)
+OpenStack compute: eth0 (NAT), eth1 (neutron), eth2 (172.16.0.202), eth3
+(192.168.100.202)
+NOTE: This can only support GRE of Flat networks - No VLAN!
+
+7. Connect to the controller
+vagrant ssh controller
+sudo –i
+
+8. Upload a small glance image (Cirros - disabled upload during install)
+
+vi /opt/base.env.json
+
+ - change cirros image upload parameter to true
+
+9. Import new environment and Re-run Chef-client
+
+knife environment from file /opt/base.env.json
+chef-client
+
+10. Checkout the VagrantRPC repo onto the controller:
+  git clone https://github.com/tomellis/VagrantRPC.git && cd VagrantRPC
+
+11. Checkout the script in the directory that will create you a running instance
+# Shows example network create, router create, instance, etc.
+./create_net_run_instance_demo.sh
+
+12. See if it's working:
+. openrc
+nova list
+
+or 
+
+https://172.16.0.200/
+ Username: admin
+ Password: secrete
+
+
+
+
